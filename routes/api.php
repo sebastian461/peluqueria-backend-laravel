@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\EventController;
+use App\Http\Controllers\API\UserEventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,11 +27,16 @@ Route::post('login', [AuthController::class, "login"]);
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
-  /* Events */
+  /* Actions */
   Route::get("action", [EventController::class, "index"]);
   Route::post('action', [EventController::class, "store"]);
   Route::put('action/{id}', [EventController::class, "update"]);
   Route::delete('action/{id}', [EventController::class, "destroy"]);
+
+  /* Events-User */
+  Route::get("event", [UserEventController::class, "index"]);
+  Route::post("event", [UserEventController::class, "store"]);
+  Route::delete("event/{id}", [UserEventController::class, "destroy"]);
 
   /* Logout */
   Route::post('logout', [AuthController::class, "logout"]);
