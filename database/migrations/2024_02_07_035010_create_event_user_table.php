@@ -17,7 +17,7 @@ return new class extends Migration
       $table->unsignedBigInteger("event_id");
       $table->foreign('user_id')->references('id')->on('users');
       $table->foreign('event_id')->references('id')->on('events');
-      $table->timestamps();
+      $table->string("created_at");
     });
   }
 
