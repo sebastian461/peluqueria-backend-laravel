@@ -28,10 +28,10 @@ Route::post('login', [AuthController::class, "login"]);
 Route::middleware(['auth:sanctum'])->group(function () {
 
   /* Actions */
-  Route::get("action", [EventController::class, "index"]);
-  Route::post('action', [EventController::class, "store"]);
-  Route::put('action/{id}', [EventController::class, "update"]);
-  Route::delete('action/{id}', [EventController::class, "destroy"]);
+  Route::get("service", [EventController::class, "index"]);
+  Route::post('service', [EventController::class, "store"]);
+  Route::put('service/{id}', [EventController::class, "update"]);
+  Route::delete('service/{id}', [EventController::class, "destroy"]);
 
   /* Events-User */
   Route::get("event", [UserEventController::class, "index"]);
@@ -42,5 +42,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('logout', [AuthController::class, "logout"]);
 
   /* Renew */
-  Route::post('renew', [AuthController::class, "renew"]);
+  Route::get('renew', [AuthController::class, "renew"]);
 });
