@@ -40,4 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   /* Logout */
   Route::post('logout', [AuthController::class, "logout"]);
+
+  /* Renew */
+  Route::post('renew', [AuthController::class, "renew"]);
 });

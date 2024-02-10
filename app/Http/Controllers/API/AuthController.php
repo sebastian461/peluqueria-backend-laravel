@@ -55,4 +55,10 @@ class AuthController extends Controller
       'message' => 'You have successfully logged out and the token was successfully deleted'
     ];
   }
+
+  public function renew(Request $request)
+  {
+    $request->user()->tokens()->delete();
+    return new LoginResource($request->user());
+  }
 }
