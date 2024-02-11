@@ -25,12 +25,12 @@ class EventController extends Controller
   public function store(Request $request)
   {
     $request->validate(([
-      "name" => "required|unique:events",
+      "title" => "required",
       "amount" => "required|numeric"
     ]));
 
     $event = Event::create([
-      "name" => $request->name,
+      "title" => $request->title,
       "amount" => $request->amount
     ]);
 
@@ -43,10 +43,12 @@ class EventController extends Controller
   public function update(Request $request, string $id)
   {
     $request->validate(([
+      "title" => "required",
       "amount" => "required|numeric"
     ]));
 
     $event = Event::find($id);
+    $event->title = $request->title;
     $event->amount = $request->amount;
     $event->save();
 

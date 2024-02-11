@@ -15,8 +15,8 @@ class GetEventResource extends JsonResource
   public function toArray(Request $request): array
   {
     return [
-      "message" => "All events",
-      "events" => new EventCollection($this)
+      "message" => "All services",
+      "services" => new EventCollection($this)
     ];
   }
 }

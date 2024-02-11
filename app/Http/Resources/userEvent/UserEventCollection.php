@@ -19,15 +19,13 @@ class UserEventCollection extends ResourceCollection
     foreach ($this->collection as $event) {
       array_push($events, [
         "id" => $event->id,
-        "event" => [
-          "name" => $event->event_name,
-          "amount" => $event->amount,
-          "created_at" => $event->created_at
-        ],
+        "title" => $event->title,
+        "amount" => $event->amount,
+        "start" => $event->start,
+        "end" => $event->end,
         "user" => [
           "id" => $event->user_id,
           "name" => $event->user_name,
-          "email" => $event->email
         ]
       ]);
     }

@@ -15,8 +15,8 @@ class GetUserEventResource extends JsonResource
   public function toArray(Request $request): array
   {
     return [
-      "message" => "Created",
-      "data" => new UserEventCollection($this)
+      "message" => "All events",
+      "events" => new UserEventCollection($this)
     ];
   }
 }

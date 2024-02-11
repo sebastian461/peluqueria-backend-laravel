@@ -15,10 +15,10 @@ class CreateEventResource extends JsonResource
   public function toArray(Request $request): array
   {
     return [
-      "message" => "Event created/updated",
-      "event" => [
+      "message" => "Service created/updated",
+      "service" => [
         "id" => $this->id,
-        "name" => $this->name,
+        "title" => $this->title,
         "amount" => $this->amount
       ]
     ];

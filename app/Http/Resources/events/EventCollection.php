@@ -19,7 +19,7 @@ class EventCollection extends ResourceCollection
     foreach ($this->collection as $event) {
       array_push($events, [
         "id" => $event->id,
-        "name" => $event->name,
+        "title" => $event->title,
         "amount" => $event->amount
       ]);
     }

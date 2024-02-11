@@ -23,10 +23,10 @@ class UserEventController extends Controller
         "event_user.id",
         "users.id as user_id",
         "users.name as user_name",
-        "users.email",
-        "events.name as event_name",
+        "events.title",
         "events.amount",
-        "event_user.created_at"
+        "event_user.start",
+        "event_user.end"
       )
       ->get();
 
@@ -36,12 +36,26 @@ class UserEventController extends Controller
   /**
    * Store a newly created resource in storage.
    */
-  public function store(Request $request)
+  public function store(Request $request, string $id)
   {
     $user = $request->user();
-    $user->events()->attach($request->id);
+    $user->events()->attach($id, ["start" => $request->start, "end" => $request->end]);
 
-    return new CreateUserEventResource($request);
+    $event = DB::table("event_user")
+      ->join("users", "event_user.user_id", "=", "users.id")
+      ->join("events", "event_user.event_id", "=", "events.id")
+      ->select(
+        "event_user.id",
+        "users.id as user_id",
+        "users.name as user_name",
+        "events.title",
+        "events.amount",
+        "event_user.start",
+        "event_user.end"
+      )
+      ->orderBy("event_user.id", "desc")->first();
+
+    return new CreateUserEventResource($event);
   }
 
   /**
