@@ -26,6 +26,8 @@ class AuthController extends Controller
       "password" => Hash::make($request->password)
     ]);
 
+    $user->roles()->attach(2);
+
     return new RegisterResource($user);
   }
 
