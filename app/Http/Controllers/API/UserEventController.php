@@ -8,6 +8,9 @@ use App\Http\Resources\userEvent\GetUserEventResource;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class UserEventController extends Controller
 {
@@ -70,5 +73,62 @@ class UserEventController extends Controller
     return response()->json([
       "message" => "Deleted",
     ]);
+  }
+
+  public function report(Request $request)
+  {
+    $events = DB::table("event_user")
+      ->join("users", "event_user.user_id", "=", "users.id")
+      ->join("events", "event_user.event_id", "=", "events.id")
+      ->select(
+        "events.title",
+        "events.amount",
+        "users.name as user_name",
+        "event_user.start",
+        "event_user.end"
+      )
+      ->get();
+
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    $headerStyle = [
+      'font' => ['bold' => true],
+      'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+    ];
+    $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+
+    $sheet->setCellValue('A1', 'Titulo');
+    $sheet->setCellValue('B1', 'Precio');
+    $sheet->setCellValue('C1', 'Encargado');
+    $sheet->setCellValue('D1', 'Inicio');
+    $sheet->setCellValue('E1', 'Fin');
+
+    foreach ($events as $index => $event) {
+      $row = $index + 2;
+      $sheet->setCellValue('A' . $row, $event->title);
+      $sheet->setCellValue('B' . $row, $event->amount);
+
+      // Formatear la celda de precio como dinero
+      $sheet->getStyle('B' . $row)->getNumberFormat()->setFormatCode('$#,##0.00');
+
+      $sheet->setCellValue('C' . $row, $event->user_name);
+      $sheet->setCellValue('D' . $row, date('d/m/Y H:i:s', strtotime($event->start)));
+      $sheet->setCellValue('E' . $row, date('d/m/Y H:i:s', strtotime($event->end)));
+    }
+
+    foreach (range('A', 'E') as $column) {
+      $sheet->getColumnDimension($column)->setAutoSize(true);
+    }
+
+
+    $writer = new Xlsx($spreadsheet);
+    $archivoExcel = 'report.xlsx';
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $archivoExcel . '"');
+    header('Cache-Control: max-age=0');
+
+    $writer->save('php://output');
   }
 }
