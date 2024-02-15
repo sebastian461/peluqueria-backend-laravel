@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\EventController;
+use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\UserEventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,9 +17,6 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-Route::get('report/{start}/{end}', [UserEventController::class, "report"]);
-Route::get('report/{id}/{start}/{end}', [UserEventController::class, "reportForId"]);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
   return $request->user();
@@ -48,4 +46,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('renew', [AuthController::class, "renew"]);
 
   /* Report */
+  Route::get('report/{start}/{end}', [UserEventController::class, "report"]);
+  Route::get('reportId/{id}/{start}/{end}', [UserEventController::class, "reportForId"]);
+
+  /* Users */
+  Route::get("user", [UserController::class, "index"]);
 });

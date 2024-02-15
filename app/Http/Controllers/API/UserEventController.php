@@ -5,11 +5,14 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\userEvent\CreateUserEventResource;
 use App\Http\Resources\userEvent\GetUserEventResource;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserEventController extends Controller
 {
@@ -76,6 +79,10 @@ class UserEventController extends Controller
 
   public function report(Request $request, $start, $end)
   {
+
+    $startFormated = $this->dateFormater($start);
+    $endFormated = $this->dateFormater($end);
+
     $events = DB::table("event_user")
       ->join("users", "event_user.user_id", "=", "users.id")
       ->join("events", "event_user.event_id", "=", "events.id")
@@ -86,23 +93,27 @@ class UserEventController extends Controller
         "event_user.start",
         "event_user.end"
       )
-      ->whereBetween("event_user.start", [$start, $end])
+      ->whereBetween("event_user.start", [$startFormated, $endFormated])
       ->get();
 
     $spreadsheet = $this->generateExcel($events);
 
+    $filePath = base_path('documents\reporte.xlsx');
+
     $writer = new Xlsx($spreadsheet);
-    $archivoExcel = 'report.xlsx';
 
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="' . $archivoExcel . '"');
-    header('Cache-Control: max-age=0');
 
-    $writer->save('php://output');
+    $writer->save($filePath);
+
+    return response()->download($filePath, 'reporte.xlsx');
   }
 
   public function reportForId(Request $request, $id, $start, $end)
   {
+    $startFormated = $this->dateFormater($start);
+    $endFormated = $this->dateFormater($end);
+
     $events = DB::table("event_user")
       ->join("users", "event_user.user_id", "=", "users.id")
       ->join("events", "event_user.event_id", "=", "events.id")
@@ -113,20 +124,21 @@ class UserEventController extends Controller
         "event_user.start",
         "event_user.end"
       )
-      ->whereBetween("event_user.start", [$start, $end])
+      ->whereBetween("event_user.start", [$startFormated, $endFormated])
       ->where("users.id", $id)
       ->get();
 
     $spreadsheet = $this->generateExcel($events);
 
+    $filePath = base_path('documents\reporte.xlsx');
+
     $writer = new Xlsx($spreadsheet);
-    $archivoExcel = 'report.xlsx';
 
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="' . $archivoExcel . '"');
-    header('Cache-Control: max-age=0');
 
-    $writer->save('php://output');
+    $writer->save($filePath);
+
+    return response()->download($filePath, 'reporte.xlsx');
   }
 
   private function generateExcel($events)
@@ -164,5 +176,21 @@ class UserEventController extends Controller
     }
 
     return $spreadsheet;
+  }
+
+  private function dateFormater($date)
+  {
+    $date = Carbon::parse($date);
+
+    $year = $date->year;
+    $month = str_pad($date->month, 2, "0", STR_PAD_LEFT);
+    $day = str_pad($date->day, 2, "0", STR_PAD_LEFT);
+    $hour = str_pad($date->hour, 2, "0", STR_PAD_LEFT);
+    $minute = str_pad($date->minute, 2, "0", STR_PAD_LEFT);
+    $second = str_pad($date->second, 2, "0", STR_PAD_LEFT);
+    $millisecond = str_pad($date->millisecond, 3, "0", STR_PAD_LEFT);
+
+    $formatDate = "{$year}-{$month}-{$day}T{$hour}:{$minute}:{$second}.{$millisecond}Z";
+    return $formatDate;
   }
 }
