@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\userEvent\CreateUserEventResource;
 use App\Http\Resources\userEvent\GetUserEventResource;
-use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -75,7 +74,7 @@ class UserEventController extends Controller
     ]);
   }
 
-  public function report(Request $request)
+  public function report(Request $request, $start, $end)
   {
     $events = DB::table("event_user")
       ->join("users", "event_user.user_id", "=", "users.id")
@@ -87,8 +86,51 @@ class UserEventController extends Controller
         "event_user.start",
         "event_user.end"
       )
+      ->whereBetween("event_user.start", [$start, $end])
       ->get();
 
+    $spreadsheet = $this->generateExcel($events);
+
+    $writer = new Xlsx($spreadsheet);
+    $archivoExcel = 'report.xlsx';
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $archivoExcel . '"');
+    header('Cache-Control: max-age=0');
+
+    $writer->save('php://output');
+  }
+
+  public function reportForId(Request $request, $id, $start, $end)
+  {
+    $events = DB::table("event_user")
+      ->join("users", "event_user.user_id", "=", "users.id")
+      ->join("events", "event_user.event_id", "=", "events.id")
+      ->select(
+        "events.title",
+        "events.amount",
+        "users.name as user_name",
+        "event_user.start",
+        "event_user.end"
+      )
+      ->whereBetween("event_user.start", [$start, $end])
+      ->where("users.id", $id)
+      ->get();
+
+    $spreadsheet = $this->generateExcel($events);
+
+    $writer = new Xlsx($spreadsheet);
+    $archivoExcel = 'report.xlsx';
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $archivoExcel . '"');
+    header('Cache-Control: max-age=0');
+
+    $writer->save('php://output');
+  }
+
+  private function generateExcel($events)
+  {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
 
@@ -121,14 +163,6 @@ class UserEventController extends Controller
       $sheet->getColumnDimension($column)->setAutoSize(true);
     }
 
-
-    $writer = new Xlsx($spreadsheet);
-    $archivoExcel = 'report.xlsx';
-
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="' . $archivoExcel . '"');
-    header('Cache-Control: max-age=0');
-
-    $writer->save('php://output');
+    return $spreadsheet;
   }
 }

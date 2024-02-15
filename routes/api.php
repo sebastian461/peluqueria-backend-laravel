@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('report', [UserEventController::class, "report"]);
+Route::get('report/{start}/{end}', [UserEventController::class, "report"]);
+Route::get('report/{id}/{start}/{end}', [UserEventController::class, "reportForId"]);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
   return $request->user();
