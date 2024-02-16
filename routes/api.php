@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\EventController;
+use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\UserEventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,5 +19,36 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+  return $request->user();
+});
+
+/* Authentication */
+Route::post('register', [AuthController::class, "register"]);
+Route::post('login', [AuthController::class, "login"]);
+
+Route::middleware(['auth:sanctum'])->group(function () {
+
+  /* Actions */
+  Route::get("service", [EventController::class, "index"]);
+  Route::post('service', [EventController::class, "store"]);
+  Route::put('service/{id}', [EventController::class, "update"]);
+  Route::delete('service/{id}', [EventController::class, "destroy"]);
+
+  /* Events-User */
+  Route::get("event", [UserEventController::class, "index"]);
+  Route::post("event/{id}", [UserEventController::class, "store"]);
+  Route::delete("event/{id}", [UserEventController::class, "destroy"]);
+
+  /* Logout */
+  Route::post('logout', [AuthController::class, "logout"]);
+
+  /* Renew */
+  Route::get('renew', [AuthController::class, "renew"]);
+
+  /* Report */
+  Route::get('report/{start}/{end}', [UserEventController::class, "report"]);
+  Route::get('reportId/{id}/{start}/{end}', [UserEventController::class, "reportForId"]);
+
+  /* Users */
+  Route::get("user", [UserController::class, "index"]);
 });
